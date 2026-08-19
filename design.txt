@@ -1,0 +1,4 @@
+User input (either form or upload an excel file)
+Calculate BMI
+AI to provide a recommendation based on the calculated data.
+Plot the graph of BMI against the percentile

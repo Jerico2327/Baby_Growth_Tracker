@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>
+        <a href="{{ url_for('home') }}">BMI Calculator</a>
+    </h1>
+    <h2>Gender: {{ new_data['gender'] }}</h2>
+    <h2>
+        Age: {{ new_data['age']['year'] }} yr.
+        {{ new_data['age']['month'] }} mo.
+        {{ new_data['age']['day'] }} day
+    </h2>
+    <h2>Weight: {{new_data['weight'] }} kg.</h2>
+    <h2>Height: {{ new_data['height'] }} m.</h2>
+    <h2>BMI: {{ new_data['bmi'] }}</h2>
+    <div>{{ fig | safe }}</div>
+</body>
+</html>
