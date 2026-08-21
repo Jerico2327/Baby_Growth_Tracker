@@ -1,9 +1,12 @@
+import os
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField, DateField, FloatField
 from wtforms.validators import DataRequired
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 from datetime import datetime as dt
+from google import genai
 
 
 class UserInput(FlaskForm):
@@ -43,7 +46,7 @@ class BMIReference:
 
         lower_percentile = None
         upper_percentile = None
-
+        limits = []
         new_df = self.df.copy().set_index("Month")
         row = new_df.loc[age['month'], new_df.columns[3:]]
 
@@ -51,11 +54,36 @@ class BMIReference:
             value = float(value)
             if bmi >= value:
                 lower_percentile = key
+
             if bmi <= value:
                 upper_percentile = key
 
-        limits = [lower_percentile, upper_percentile]
-        print(limits)
+        if lower_percentile is not None:
+            limits.append(lower_percentile)
+        if upper_percentile is not None:
+            limits.append(upper_percentile)
+
         return limits
 
 
+class AIAnalysis:
+
+    # def __init__(self, bmi, gender, weight, height, age):
+    #     self.bmi = bmi
+    #     self.gender = gender
+    #     self.weight = weight
+    #     self.height = height
+    #     self.age = age
+    #
+
+    @staticmethod
+    def analyze(df=None, bmi=None, gender=None, weight=None, height=None, age=None):
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        prompt = client.models.generate_content(
+            model="gemini-3.5-flash",
+            contents=f"In 2-3 sentence, give a recommendation about a baby {gender} who"
+                     f"has a BMI of {bmi} at the age of {age} months"
+                     f"in terms of z-score and bmi category."
+        )
+
+        return prompt.text

@@ -1,0 +1,42 @@
+#main-div, #result-div {
+    display: flex;
+    justify-content: center;
+    align-items:center;
+    min-height: 100vh;
+}
+
+.form > div > .form-label {
+    margin-right: 15px;
+    padding-right: 16px;
+}
+
+.form > div {
+    margin: 20px;
+}
+
+.form > input {
+    margin: 20px;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+#result-div > .row {
+    min-width: 100vw;
+}
+
+.result-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.result-info > div,
+.result-info > p {
+    font-size: 16px;
+    text-align: left;
+    width: 80%;
+    margin: 5px;
+}
