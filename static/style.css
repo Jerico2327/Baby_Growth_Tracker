@@ -5,6 +5,17 @@
     min-height: 100vh;
 }
 
+h1 {
+    text-align: center;
+    margin-bottom: 32px !important;
+}
+
+form{
+    border: 1px solid black;
+    border-radius: 15px;
+    padding: 15px;
+}
+
 .form > div > .form-label {
     margin-right: 15px;
     padding-right: 16px;
@@ -16,6 +27,15 @@
 
 .form > input {
     margin: 20px;
+
+}
+
+.form > #submit {
+    display: block;
+    margin: 15px auto;
+    background-color: black;
+    border: none;
+    font-weight: bold;
 }
 
 a {
@@ -26,6 +46,19 @@ a {
     min-width: 100vw;
 }
 
+#result-div > div > p {
+    font-size: 16px;
+    text-align: center;
+    width: 100%;
+    margin: 5px 0;
+}
+
+#result-div > div > h5 {
+    text-align: center;
+    width: 100%;
+    margin: 5px 0;
+}
+
 .result-info {
     display: flex;
     justify-content: center;
@@ -33,10 +66,9 @@ a {
     flex-direction: column;
 }
 
-.result-info > div,
-.result-info > p {
+.result-info > div {
     font-size: 16px;
     text-align: left;
     width: 80%;
-    margin: 5px;
+    margin: 2px 0;
 }

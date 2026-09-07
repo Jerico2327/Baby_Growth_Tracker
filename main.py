@@ -1,5 +1,7 @@
 import os
-from flask import Flask, render_template,request
+from pprint import pprint
+
+from flask import Flask, render_template, request, redirect, url_for, session
 import pandas as pd
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap5
@@ -7,7 +9,6 @@ import plotly.express as px
 from google import genai
 
 from bmi import UserInput, Calculate, BMIReference, AIAnalysis
-
 
 load_dotenv()
 
@@ -20,41 +21,55 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 BOY_DF = pd.read_csv("data/tab_bmi_boys_p_0_2.csv")
 GIRL_DF = pd.read_csv("data/tab_bmi_girls_p_0_2.csv")
 
-from pprint import pprint
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    """ Created this form object just to render in the index.html """
     form = UserInput()
-
     if form.validate_on_submit():
+        age = Calculate.age(form.birthdate.data)
+        gender = form.gender.data
+        weight = form.weight.data
+        height = form.height.data
+        bmi = Calculate.bmi(weight, height)
 
-        if form.gender.data == "boy":
+        if gender == "boy":
             bmi_ref = BMIReference(BOY_DF)
         else:
             bmi_ref = BMIReference(GIRL_DF)
 
-        age = Calculate.age(form.birthdate.data)
-        bmi = Calculate.bmi(form.weight.data, form.height.data)
-        new_data = {
-            "gender": form.gender.data,
-            "age": age,
-            "weight": form.weight.data,
-            "height": form.height.data,
-            "bmi": bmi,
-            "df": bmi_ref.df,
-            "percentile": bmi_ref.get_percentile(age, bmi)
-        }
+        new_data = {"gender": gender, "age": age, "weight": weight, "height": height, "bmi": bmi,
+                    "percentile": bmi_ref.get_percentile(age, bmi)}
+
         ai_output = AIAnalysis.analyze(
             bmi=new_data['bmi'],
-            age=new_data['age']['month'])
-        new_data['ai_text'] = ai_output
-        fig = create_figure(new_data)
+            age=new_data['age']['month']
+        )
 
-        return render_template("result.html", new_data=new_data, fig=fig)
-    elif request.method == "POST":
+        new_data['ai_output'] = ai_output
 
-        handle_excel_file_as_input(request.files.get('excel_file'))
-
+        session['session_data'] = new_data
+        return redirect(url_for('result'))
     return render_template("index.html", form=form)
+
+
+@app.route("/result", methods=['GET', 'POST'])
+def result():
+
+    data = session.get("session_data")
+
+    if data['gender'] == "boy":
+        bmi_ref = BMIReference(BOY_DF)
+    else:
+        bmi_ref = BMIReference(GIRL_DF)
+
+    data['percentile'] = bmi_ref.get_percentile(data['age'], data['bmi'])
+    pprint(data)
+
+    fig = create_figure(data, bmi_ref.df)
+
+    return render_template('result.html', new_data=data, fig=fig)
+
 
 
 def handle_excel_file_as_input(file):
@@ -69,13 +84,9 @@ def handle_excel_file_as_input(file):
     pass
 
 
-
-
-
-def create_figure(data):
-
+def create_figure(data, df):
     fig = px.line(
-        data['df'],
+        df,
         title=f"BMI Percentile for 0-to-2-year-old-{data['gender']} ",
         x="Month",
         y=data['percentile']
@@ -92,7 +103,6 @@ def create_figure(data):
     fig.update_yaxes(dtick=1)
     fig_div = fig.to_html(full_html=False)
     return fig_div
-
 
 
 if __name__ == "__main__":

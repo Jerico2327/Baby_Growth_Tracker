@@ -16,7 +16,7 @@ class UserInput(FlaskForm):
     birthdate = DateField("Birthdate", validators=[DataRequired()])
     weight = FloatField("Weight (kg)", validators=[DataRequired(message="Numeric input is required.")])
     height = FloatField("Height (m)", validators=[DataRequired(message="Numeric input is required.")])
-    submit = SubmitField("Get BMI")
+    submit = SubmitField("Calculate BMI")
 
 
 class Calculate:
@@ -28,6 +28,7 @@ class Calculate:
 
     @staticmethod
     def age(bdate):
+
         diff = relativedelta(dt.now(), bdate)
         age = {
             "year": diff.years,
@@ -68,22 +69,19 @@ class BMIReference:
 
 class AIAnalysis:
 
-    # def __init__(self, bmi, gender, weight, height, age):
-    #     self.bmi = bmi
-    #     self.gender = gender
-    #     self.weight = weight
-    #     self.height = height
-    #     self.age = age
-    #
-
     @staticmethod
     def analyze(df=None, bmi=None, gender=None, weight=None, height=None, age=None):
         client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        prompt = client.models.generate_content(
-            model="gemini-3.5-flash",
-            contents=f"In 2-3 sentence, give a recommendation about a baby {gender} who"
-                     f"has a BMI of {bmi} at the age of {age} months"
-                     f"in terms of z-score and bmi category."
-        )
-
-        return prompt.text
+        try:
+            prompt = client.models.generate_content(
+                model="gemini-3.8-flash",
+                contents=f"In 2-3 sentence, give a recommendation about a baby {gender} who"
+                         f"has a BMI of {bmi} at the age of {age} months"
+                         f"in terms of z-score and bmi category."
+            )
+        except Exception as e:
+            print(f"Exception error: {e}")
+            return "Recommendation is currently unavailable."
+        else:
+            print("AI API Called")
+            return prompt.text
