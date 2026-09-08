@@ -18,8 +18,36 @@
         {{ render_form(form) }}
         </div>
     </div>
+    <script>
+        let loadingInterval;
+
+        document.querySelector("form").addEventListener("submit", function () {
+            const button = this.querySelector('input[type="submit"]');
+
+            button.disabled = true;
+
+            let dots = 0;
+
+            loadingInterval = setInterval(function () {
+                dots = (dots % 3) + 1;
+                button.value = "Loading" + ".".repeat(dots);
+            }, 500);
+        });
+
+        window.addEventListener("pageshow", function () {
+            clearInterval(loadingInterval);
+
+            const button = document.querySelector('input[type="submit"]');
+
+            if (button) {
+
+                button.disabled = false;
+                button.value = "Calculate";
+            }
+        });
+    </script>
 <!--    <div>-->
-<!--        <p>Follow the format in the image for excel file upload.</p>-->
+<!--        <p>Follow the format in the image for Excel file upload.</p>-->
 <!--        <img src="{{ url_for('static', filename='assets/excel_format.jpg') }}"/>-->
 <!--        <form method="POST" enctype="multipart/form-data">-->
 <!--            <input-->

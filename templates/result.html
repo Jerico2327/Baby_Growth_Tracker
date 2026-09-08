@@ -13,11 +13,11 @@
     <div id="result-div" class="container-fluid">
         <div class="row">
             <div>
-                <h1 class="text-center">
+                <h1 class="bmi-logo text-center">
                     <a href="{{ url_for('home') }}">BMI app</a>
                 </h1>
             </div>
-            <div class="result-info col-4">
+            <div class="result-info col-2">
                 <div>Gender: {{ new_data['gender'] }}</div>
                 <div>
                     Age: {{ new_data['age']['year'] }} yr.
@@ -27,8 +27,9 @@
                 <div>Weight: {{new_data['weight'] }} kg.</div>
                 <div>Height: {{ new_data['height'] }} m.</div>
                 <div>BMI: {{ new_data['bmi'] }}</div>
+                <div>Z-score: {{ new_data['zscore'] }}</div>
             </div>
-            <div class="col-8">{{ fig | safe }}</div>
+            <div class="col-10">{{ fig | safe }}</div>
             <h5>Evaluation</h5>
             <p>{{ new_data['ai_output'] }}</p>
         </div>

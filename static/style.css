@@ -1,3 +1,5 @@
+
+
 #main-div, #result-div {
     display: flex;
     justify-content: center;
@@ -5,20 +7,21 @@
     min-height: 100vh;
 }
 
-h1 {
+h1, .bmi-logo > a {
     text-align: center;
     margin-bottom: 32px !important;
+    font-weight: bold !important;
+    color: #1BA805 !important;
 }
 
-form{
-    border: 1px solid black;
+form {
     border-radius: 15px;
     padding: 15px;
+    background-color: rgba(0, 255, 0, 0.3);
 }
 
-.form > div > .form-label {
-    margin-right: 15px;
-    padding-right: 16px;
+.form > div select::placeholder {
+    color: gray;
 }
 
 .form > div {
@@ -27,15 +30,26 @@ form{
 
 .form > input {
     margin: 20px;
+}
 
+select,
+input[type="date"],
+input[type="number"] {
+    color: #64748B;
+}
+
+select option {
+    color: #64748B;
 }
 
 .form > #submit {
     display: block;
     margin: 15px auto;
-    background-color: black;
+    padding: 10px 15px 10px 15px;
+    background-color: #1BA805;
     border: none;
     font-weight: bold;
+    border-radius: 50px;
 }
 
 a {
