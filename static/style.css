@@ -1,4 +1,8 @@
-
+* {
+  font-family: "Comic Relief", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
 
 #main-div, #result-div {
     display: flex;
@@ -85,4 +89,9 @@ a {
     text-align: left;
     width: 80%;
     margin: 2px 0;
+}
+
+.error > h1,
+.error > h3 {
+    text-align: center;
 }

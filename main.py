@@ -33,6 +33,10 @@ def home():
 
     if form.validate_on_submit():
         age = Calculate.age(form.birthdate.data)
+        print(f'age: {age["month"]}')
+        if age['month'] > 24:
+            return render_template("error.html")
+
         gender = form.gender.data
         weight = form.weight.data
         height = form.height.data
