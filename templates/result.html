@@ -24,7 +24,7 @@
                 <div>Gender: {{ new_data['gender'] }}</div>
                 <div>
                     Age: {{ new_data['age']['year'] }} yr.
-                    {{ new_data['age']['month'] }} mo.
+                    {{ (new_data['age']['month'] - 12) | abs }} mo.
                     {{ new_data['age']['day'] }} day
                 </div>
                 <div>Weight: {{new_data['weight'] }} kg.</div>
