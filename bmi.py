@@ -2,11 +2,12 @@ import os
 
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, DateField, FloatField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 from dateutil.relativedelta import relativedelta
 from datetime import datetime as dt
 from google import genai
-
+import json
+import time
 
 class UserInput(FlaskForm):
 
@@ -18,26 +19,44 @@ class UserInput(FlaskForm):
     birthdate = DateField("",
                           render_kw={"placeholder": "dd/mm/yyyy"},
                           validators=[DataRequired()])
+    birth_weight = FloatField("",
+                              render_kw={"placeholder": "Birth weight (kg)"},
+                              validators=[Optional()]
+                              )
+    birth_height = FloatField("",
+                              render_kw={"placeholder": "Birth height (m)"},
+                              validators=[Optional()]
+                              )
     weight = FloatField("",
-                        render_kw={"placeholder": "Weight (kg)"},
+                        render_kw={"placeholder": "Current weight (kg)"},
                         validators=[DataRequired(message="Numeric input is required.")])
     height = FloatField("",
-                        render_kw={"placeholder": "Height (m)"},
+                        render_kw={"placeholder": "Current height (m)"},
                         validators=[DataRequired(message="Numeric input is required.")])
     submit = SubmitField("Calculate", render_kw={"class": "w-75"})
 
 
 class Calculate:
 
-    """ Performs the calculations needed to get the BMI. """
+    """ Perform the calculations needed to get the BMI. """
 
     @staticmethod
-    def bmi(weight, height):
-        bmi = round(float(weight) / (float(height)**2), 2)
-        return bmi
+    def bmi(age, weight, height, birth_weight, birth_height) -> dict:
+
+        bmi_collections = {}
+
+        if birth_height and birth_weight:
+            birth_bmi = round(float(birth_weight)/(float(birth_height)**2), 2)
+            bmi_collections = {
+                0: birth_bmi
+            }
+        bmi = round(float(weight) / (float(height) ** 2), 2)
+        bmi_collections[age['month']] = bmi
+
+        return bmi_collections
 
     @staticmethod
-    def age(bdate):
+    def age(bdate) -> dict:
 
         diff = relativedelta(dt.now(), bdate)
         age = {
@@ -60,10 +79,10 @@ class BMIReference:
         self.percentile_df = percentile_df
         self.zscore_df = zscore_df
 
-    def get_percentile(self, age, bmi):
+    def get_percentile(self, age, bmi) -> list:
 
         """ Returns the boundaries where the calculated BMI lies. """
-
+        # print(bmi)
         lower_percentile = None
         upper_percentile = None
         limits = []
@@ -72,11 +91,12 @@ class BMIReference:
 
         for key, value in row.items():
             value = float(value)
-            if bmi >= value:
-                lower_percentile = key
+            for m, b in bmi.items():
+                if bmi[m] >= value:
+                    lower_percentile = key
 
-            if bmi <= value:
-                upper_percentile = key
+                if bmi[m] <= value:
+                    upper_percentile = key
 
         if lower_percentile is not None:
             limits.append(lower_percentile)
@@ -85,7 +105,7 @@ class BMIReference:
 
         return limits
 
-    def get_zscore(self, age, bmi):
+    def get_zscore(self, age, bmi) -> int:
 
         """ The z-score will be provided to the AI for a more reliable evaluation. """
 
@@ -94,21 +114,22 @@ class BMIReference:
         row = zscore_df.loc[age['month'], z_columns]
 
         for key, val in row.items():
-            if bmi >= val:
-                if key == "SD3neg":
-                    zscore = -3
-                elif key == "SD2neg":
-                    zscore = -2
-                elif key == "SD1neg":
-                    zscore = -1
-                elif key == "SD0":
-                    zscore = 0
-                elif key == "SD1":
-                    zscore = 1
-                elif key == "SD2":
-                    zscore = 2
-                elif key == "SD3":
-                    zscore = 3
+            for m, b in bmi.items():
+                if bmi[m] >= val:
+                    if key == "SD3neg":
+                        zscore = -3
+                    elif key == "SD2neg":
+                        zscore = -2
+                    elif key == "SD1neg":
+                        zscore = -1
+                    elif key == "SD0":
+                        zscore = 0
+                    elif key == "SD1":
+                        zscore = 1
+                    elif key == "SD2":
+                        zscore = 2
+                    elif key == "SD3":
+                        zscore = 3
         return zscore
 
 
@@ -117,18 +138,27 @@ class AIAnalysis:
     """ Handles the AI interaction using the baby's input and calculated data. """
 
     @staticmethod
-    def analyze(df=None, bmi=None, gender=None, weight=None, height=None, age=None, z_score=0):
+    def analyze(percentile, bmi, gender, age, z_score) -> str:
         client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        try:
-            prompt = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents=f"In 2-3 sentences, give a brief recommendation/evaluation about a baby {gender} who"
-                         f"has a BMI of {bmi} at the age of {age} months"
-                         f"in terms of z-score {z_score}."
-            )
-        except Exception as e:
-            print(f"Exception error: {e}")
-            return "Recommendation is currently unavailable."
-        else:
-            print("AI API Called")
-            return prompt.text
+        for attempt in range(3):
+            try:
+                bmi = json.dumps(bmi)
+                prompt = client.models.generate_content(
+                    model="gemini-3.8-flash",
+                    contents=f"Gender: {gender}"
+                             # f"Age: {age}"
+                             f"BMI pattern (month: bmi): {bmi}"
+                             f"WHO percentile: {percentile}"
+                             f"WHO Z-score: {z_score}"
+                             f"Give a brief 2 sentence-evaluation of bmi vs the WHO data"
+                )
+            except Exception as e:
+                print(f"Exception error: {e}")
+                print(f"attempt: {attempt}")
+                if attempt < 2:
+                    time.sleep(2 ** attempt + 1)
+                    continue
+                return "Currently unavailable"
+            else:
+                print("AI API Called")
+                return prompt.text

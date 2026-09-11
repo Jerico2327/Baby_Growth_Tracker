@@ -33,14 +33,16 @@ def home():
 
     if form.validate_on_submit():
         age = Calculate.age(form.birthdate.data)
-        print(f'age: {age["month"]}')
         if age['month'] > 24:
             return render_template("error.html")
 
         gender = form.gender.data
         weight = form.weight.data
         height = form.height.data
-        bmi = Calculate.bmi(weight, height)
+        birth_weight = form.birth_weight.data
+        birth_height = form.birth_height.data
+
+        bmi = Calculate.bmi(age, weight, height, birth_weight, birth_height)
 
         if gender == "boy":
             bmi_ref = BMIReference(BOY_PERCENTILE_DF, BOY_ZSCORE_DF)
@@ -54,9 +56,11 @@ def home():
 
         """ This will call the Gemini model from the custom class to get evaluation of the BMI. """
         ai_output = AIAnalysis.analyze(
+            gender=new_data['gender'],
             bmi=new_data['bmi'],
             age=new_data['age']['month'],
-            z_score=new_data['zscore']
+            z_score=new_data['zscore'],
+            percentile=new_data['percentile']
         )
 
         new_data['ai_output'] = ai_output
@@ -68,7 +72,7 @@ def home():
 
     return render_template("index.html", form=form)
 
-
+from pprint import pprint
 @app.route("/result", methods=['GET', 'POST'])
 def result():
 
@@ -114,14 +118,22 @@ def create_figure(data, df):
         y=data['percentile']
     )
 
-    fig.add_scatter(
-        x=[data['age']['month']],
-        y=[data['bmi']],
-        name="Calculated BMI",
-        hovertemplate=(
-            "BMI: %{y:.2f} <br>"
+    for m, b in data['bmi'].items():
+
+        if m == "0":
+            trace_name = "BMI at birth"
+        elif m == list(data['bmi'].keys())[-1]:
+            trace_name = "Current BMI"
+        else:
+            trace_name = "Calculated BMI"
+        fig.add_scatter(
+            x=[m],
+            y=[b],
+            name=trace_name,
+            hovertemplate=(
+                "BMI: %{y:.2f} <br>"
+            )
         )
-    )
     fig.update_layout(
         yaxis_title="Percentile"
     )

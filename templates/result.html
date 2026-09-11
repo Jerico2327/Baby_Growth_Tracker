@@ -29,7 +29,7 @@
                 </div>
                 <div>Weight: {{new_data['weight'] }} kg.</div>
                 <div>Height: {{ new_data['height'] }} m.</div>
-                <div>BMI: {{ new_data['bmi'] }}</div>
+                <div>BMI: {{ new_data.bmi[new_data.age.month|string] }}</div>
                 <div>Z-score: {{ new_data['zscore'] }}</div>
             </div>
             <div class="col-10">{{ fig | safe }}</div>
