@@ -139,7 +139,8 @@ The application requires a Google Gemini API key for the AI functionality.
 Create a `.env` file in the project root:
 
 ```env
-GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_gemini_api_key
+FLASK_KEY=your_flask_api_key
 ```
 
 Make sure `.env` is included in `.gitignore` so that your API key is not committed to GitHub.
