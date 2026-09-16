@@ -5,7 +5,6 @@ import pandas as pd
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap5
 import plotly.express as px
-from google import genai
 
 from bmi import UserInput, Calculate, BMIReference, AIAnalysis
 
@@ -15,7 +14,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("FLASK_KEY")
 bootstrap = Bootstrap5(app)
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 """ Excel files containing the WHO Data """
 BOY_PERCENTILE_DF = pd.read_csv("data/tab_bmi_boys_p_0_2.csv")
@@ -137,7 +135,7 @@ def create_figure(data, df):
     fig.update_layout(
         yaxis_title="Percentile"
     )
-    fig.layout.legend.title.text = "Percentiles"
+    fig.layout.legend.title.text = "Indicators"
     fig.update_xaxes(dtick=1)
     fig.update_yaxes(dtick=1)
 

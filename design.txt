@@ -1,4 +1,4 @@
-User input (either form or upload an excel file)
+User input (either form or upload an Excel file) - File upload will be added in the future
 Calculate BMI
-AI to provide a recommendation based on the calculated data.
+AI to provide a evaluation based on the calculated data.
 Plot the graph of BMI against the percentile

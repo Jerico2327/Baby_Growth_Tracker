@@ -4,3 +4,6 @@
 # PyCache
 __pycache__/
 *.pyc
+
+# design
+ai features
