@@ -4,13 +4,17 @@ A web-based baby BMI calculator built with Python and Flask. The application cal
 
 The application also provides an interactive growth chart using Plotly and an AI-generated interpretation using the Google Gemini API.
 
-## Demo / Screenshots
+## Demo 
 
-### Input
+Try the application using this URL: https://baby-growth-tracker-8p8f.onrender.com
+
+### Screenshots
+
+#### Input
 
 ![img_3.png](img_3.png)
 
-### Results
+#### Results
 
 ![img_2.png](img_2.png)
 
